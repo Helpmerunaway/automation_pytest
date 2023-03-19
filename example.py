@@ -1,3 +1,61 @@
+from db import session
+from sqlalchemy.sql.expression import desc
+import tables
+
+"""
+Простые запросы в базу 
+"""
+# first - вернет первый попавшийся результат (фильм)
+result = session.query(tables.Films.film_id, tables.Films.title).first()
+# all - вернет все фильмы в виде массива
+result_all = session.query(tables.Films.film_id, tables.Films.title).all()
+# one_or_none - вернет либо один результат (фильм) либо ничего
+result_one = session.query(tables.Films.film_id, tables.Films.title).one_or_none()
+print(result)
+
+result_one_or_none = session.query(
+    tables.Films.film_id, tables.Films.title
+).filter(
+    tables.Films.film_id == 180
+).one_or_none()
+if result_one_or_none:
+    print('All is good')
+else:
+    print("Not good")
+# выводит все фильмы которые подходят под параметры
+result_min_max = session.query(
+    tables.Films.film_id > 100,
+    tables.Films.film_id < 150
+).all()
+
+if result_min_max:
+    print("All is good")
+else:
+    print("Not good")
+
+film_ids = session.query(
+    tables.Films.film_id
+).filter(tables.Films.film_id > 180).subquery()
+print(film_ids)
+
+result_1 = session.query(tables.Films.title).filter(tables.Films.film_id.in_(film_ids)).all()
+print(result_1)
+
+# сортировка по film_id
+film_idss = session.query(
+    tables.Films.film_id,
+    tables.Films.title
+).order_by(tables.Films.film_id).all()
+
+print(film_idss)
+
+# обратная сортировка сортировка по film_id с лимитом 1 (сколько дать) и оффсетом 1 (сколько пропустить)
+film_ids_re = session.query(
+    tables.Films.film_id,
+    tables.Films.title
+).order_by(desc(tables.Films.film_id)).limit(1).offset(1).all()
+
+print(film_ids_re)
 """
 Пример объекта на котором вы можете потренироваться, используя pydantic схемы.
 Example of object for training with pydantic schemas.
